@@ -1,3 +1,3 @@
 # library
 
-Coming soon. Very soon.
+Coming soon.
