@@ -17,13 +17,31 @@
 		 * @return boolean <b>TRUE</b> if the file or directory exists, <b>FALSE</b> if not.
 		 */
 		public function fileExists($filepath) {
-			$filepath = trim($filepath, '/');
-			
-			if(file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$filepath)) {
-				return true;
-			} else {
-				return false;
-			}
+			return file_exists($this->root.trim($filepath, "/")) ? true : false;
+		}
+		
+		/**
+		 * Checks if a file is a directory.
+		 * 
+		 * @param string $filepath
+		 * <p>Absolut path from the root to the file.</p>
+		 * 
+		 * @return boolean <b>TRUE</b> if the file is a directory, <b>FALSE</b> if not.
+		 */
+		public function isDir($filepath) {
+			return ($this->fileExists($filepath) && is_dir($this->root.trim($filepath, "/"))) ? true : false;
+		}
+		
+		/**
+		 * Checks if a file is not a directory.
+		 * 
+		 * @param string $filepath
+		 * <p>Absolut path from the root to the file.</p>
+		 * 
+		 * @return boolean <b>TRUE</b> if the file is not a directory, <b>FALSE</b> if it is.
+		 */
+		public function isFile($filepath) {
+			return ($this->fileExists($filepath) && ! $this->isDir($filepath)) ? true : false;
 		}
 		
 		/**
@@ -38,18 +56,16 @@
 		 * @return boolean <b>TRUE</b> on success, <b>FALSE</b> if path is wrong or directory already exists.
 		 */
 		public function createDir($path, $name) {
-			$path = ltrim($path, '/');
+			$path = trim($path, '/');
 			$name = trim($name, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path)) {
+			if(! $this->isDir($path.DIRECTORY_SEPARATOR.$name)) {
 				return $this->addLibError("Mappen kunne ikke findes.");
-			}
-			
-			if(file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$name) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$name)) {
+			} elseif($this->isDir($path.DIRECTORY_SEPARATOR.$name)) {
 				return $this->addLibError("Mappen findes allerede.");
 			}
 			
-			mkdir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$name);
+			mkdir($this->root.$path.DIRECTORY_SEPARATOR.$name);
 			
 			clearstatcache();
 			
@@ -72,13 +88,13 @@
 		 */
 		public function createFile($path, $name, $content = "") {
 			$path = trim($path, '/');
-			$name = ltrim($name, '/');
+			$name = trim($name, '/');
 			
-			if(file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$name)) {
+			if($this->isFile($path.DIRECTORY_SEPARATOR.$name)) {
 				return $this->addLibError("Filen findes allerede.");
 			}
 			
-			file_put_contents(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$name, $content);
+			file_put_contents($this->root.$path.DIRECTORY_SEPARATOR.$name, $content);
 			
 			clearstatcache();
 			

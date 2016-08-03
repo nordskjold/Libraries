@@ -3,6 +3,7 @@
 	class Lib_base extends database {
 		
 		private $lib_errors;
+		protected $root, $lib_path;
 		
 		/**
 		 * Disabling extending of database functions, restricting database to base only
@@ -25,6 +26,11 @@
 		
 		final protected function findAll($filter, $order, $limit, $table_name) {
 			parent::findAll($filter, $order, $limit, $table_name);
+		}
+		
+		private function __construct() {
+			$this->root = $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR;
+			$this->lib_path = dirname(__FILE__);
 		}
 		
 		/**
