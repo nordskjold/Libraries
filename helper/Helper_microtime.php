@@ -55,6 +55,8 @@
 		private static function resultCalc($start, $end) {
 			$result_raw = number_format($end - $start, 4, ".", "");
 			
+			$result = array("ms" => ceil($result_raw * 1000), "s" => 0);
+			
 			$clear_int = (float)floor($result_raw);
 			$result_raw = (float)$result_raw - $clear_int;
 			
@@ -62,7 +64,7 @@
 				$result_raw = 0.0001;
 			}
 			
-			$result = $clear_int + ceil($result_raw * pow(10, 2)) / pow(10, 2);
+			$result["s"] = $clear_int + ceil($result_raw * pow(10, 2)) / pow(10, 2);
 			
 			return $result;
 		}
@@ -97,7 +99,7 @@
 				self::$microtimeLog[] = $log;
 
 				$logs = array();
-				$total = (float)0;
+				$total = array("ms" => (float)0, "s" => (float)0);
 
 				foreach(self::$microtimeLog as $k => $log) {
 					if(array_key_exists(($k + 1), self::$microtimeLog)) {
@@ -105,13 +107,14 @@
 						$end = self::$microtimeLog[($k + 1)];
 
 						$result = self::$resultCalc($start->time, $end->time);
-						$total += $result;
+						$total["ms"] += $result["ms"];
+						$total["s"] += $result["s"];
 
-						$logs[] = 'Line ' .$start->line. '-' .$end->line. ';' .($start->caption !== null ? ' ' .$start->caption. ':' : ""). ' ' .$result. ' s';
+						$logs[] = 'Line ' .$start->line. '-' .$end->line. ';' .($start->caption !== null ? ' ' .$start->caption. ':' : ""). ' ' .$result["ms"]. ' ms., ' .$result["s"]. ' s.';
 					}
 				}
 
-				$logs[] = 'Line ' .self::$microtimeLog[0]->line. '-' .self::$microtimeLog[count(self::$microtimeLog) - 1]->line. '; ' .$total. ' s';
+				$logs[] = 'Line ' .self::$microtimeLog[0]->line. '-' .self::$microtimeLog[count(self::$microtimeLog) - 1]->line. '; ' .$total["ms"]. ' ms., ' .$total["s"]. ' s.';
 
 				return $logs;
 			} else {
