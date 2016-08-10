@@ -59,8 +59,8 @@
 			$path = trim($path, '/');
 			$name = trim($name, '/');
 			
-			if(! $this->isDir($path.DIRECTORY_SEPARATOR.$name)) {
-				return $this->addLibError("Mappen kunne ikke findes.");
+			if(! $this->isDir($path)) {
+				return $this->addLibError("Stien findes ikke.");
 			} elseif($this->isDir($path.DIRECTORY_SEPARATOR.$name)) {
 				return $this->addLibError("Mappen findes allerede.");
 			}
@@ -90,7 +90,9 @@
 			$path = trim($path, '/');
 			$name = trim($name, '/');
 			
-			if($this->isFile($path.DIRECTORY_SEPARATOR.$name)) {
+			if(! $this->isDir($path)) {
+				return $this->addLibError("Stien findes ikke.");
+			} elseif($this->isFile($path.DIRECTORY_SEPARATOR.$name)) {
 				return $this->addLibError("Filen findes allerede.");
 			}
 			
@@ -112,18 +114,18 @@
 		public function deleteDir($dir) {
 			$dir = trim($dir, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir)) {
-				return $this->addLibError("Mappen kunne ikke findes.");
+			if(! $this->isDir($dir)) {
+				return $this->addLibError("Stien findes ikke.");
 			}
 			
-			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::CHILD_FIRST);
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->root.$dir), RecursiveIteratorIterator::CHILD_FIRST);
 			
 			foreach($files as $fileinfo) {
 				$remove_method = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
 				$remove_method($fileinfo->getRealPath());
 			}
 			
-			rmdir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir);
+			rmdir($this->root.$dir);
 			
 			clearstatcache();
 			
@@ -141,11 +143,11 @@
 		public function deleteFile($file) {
 			$file = trim($file, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($file)) {
+				return $this->addLibError("Filen findes ikke.");
 			}
 			
-			unlink(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file);
+			unlink($this->root.$file);
 			
 			clearstatcache();
 			
@@ -171,11 +173,13 @@
 			$dir = trim($dir, '/');
 			$new_name = trim($new_name, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$dir) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$dir)) {
-				return $this->addLibError("Mappen kunne ikke findes.");
+			if(! $this->isDir($path.DIRECTORY_SEPARATOR.$dir)) {
+				return $this->addLibError("Mappen findes ikke.");
+			} elseif($this->isDir($path.DIRECTORY_SEPARATOR.$new_name)) {
+				return $this->addLibError("Mappen findes allerede.");
 			}
 			
-			rename(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$dir, dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$new_name);
+			rename($this->root.$path.DIRECTORY_SEPARATOR.$dir, $this->root.$path.DIRECTORY_SEPARATOR.$new_name);
 			
 			clearstatcache();
 			
@@ -201,11 +205,13 @@
 			$file = trim($file, '/');
 			$new_name = trim($new_name, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$file) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($path.DIRECTORY_SEPARATOR.$file)) {
+				return $this->addLibError("Filen findes ikke.");
+			} elseif($this->isFile($path.DIRECTORY_SEPARATOR.$new_name)) {
+				return $this->addLibError("Filen findes allerede.");
 			}
 			
-			rename(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$file, dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$new_name);
+			rename($this->root.$path.DIRECTORY_SEPARATOR.$file, $this->root.$path.DIRECTORY_SEPARATOR.$new_name);
 			
 			clearstatcache();
 			
@@ -227,12 +233,14 @@
 			$dir = trim($dir, '/');
 			$new_dir_dst = trim($new_dir_dst, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir)) {
-				return $this->addLibError("Mappen kunne ikke findes.");
+			if(! $this->isDir($dir) || ! $this->isDir($new_dir_dst)) {
+				return $this->addLibError("Mappen findes ikke.");
+			} elseif($this->isDir($new_dir_dst.DIRECTORY_SEPARATOR.$dir)) {
+				return $this->addLibError("Mappen findes allerede.");
 			}
 			
-			$dir_stream = opendir($dir);
-			@mkdir($new_dir_dst);
+			$dir_stream = opendir($this->root.$dir);
+			@mkdir($this->root.$new_dir_dst);
 			
 			while(false !== ($file = readdir($dir_stream))) {
 				if(($file != '.') && ($file != '..')) {
@@ -266,11 +274,15 @@
 			$file = trim($file, '/');
 			$new_file_dst = trim($new_file_dst, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($file)) {
+				return $this->addLibError("Filen findes ikke.");
+			} elseif(! $this->isDir($new_file_dst)) {
+				return $this->addLibError("Mappen findes ikke.");
+			} elseif($this->isFile($new_file_dst.DIRECTORY_SEPARATOR.$file)) {
+				return $this->addLibError("Filen findes allerede.");
 			}
 			
-			copy(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file, dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$new_file_dst);
+			copy($this->root.$file, $this->root.$new_file_dst);
 			
 			clearstatcache();
 			
@@ -291,8 +303,10 @@
 		public function moveDir($dir, $new_dir_dst) {
 			$dir = trim($dir, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir)) {
-				return $this->addLibError("Mappen kunne ikke findes.");
+			if(! $this->isDir($dir) || ! $this->isDir($new_dir_dst)) {
+				return $this->addLibError("Mappen findes ikke.");
+			} elseif($this->isDir($new_dir_dst.DIRECTORY_SEPARATOR.$dir)) {
+				return $this->addLibError("Mappen findes allerede.");
 			}
 			
 			$this->copyDir($dir, $new_dir_dst);
@@ -317,8 +331,12 @@
 		public function moveFile($file, $new_file_dst) {
 			$file = trim($file, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($file)) {
+				return $this->addLibError("Filen findes ikke.");
+			} elseif(! $this->isDir($new_file_dst)) {
+				return $this->addLibError("Mappen findes ikke.");
+			} elseif($this->isFile($new_file_dst.DIRECTORY_SEPARATOR.$file)) {
+				return $this->addLibError("Filen findes allerede.");
 			}
 			
 			$this->copyFile($file, $new_file_dst);
@@ -340,11 +358,11 @@
 		public function getFileContent($file) {
 			$file = trim($file, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($file)) {
+				return $this->addLibError("Filen findes ikke.");
 			}
 			
-			$content = file_get_contents(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file);
+			$content = file_get_contents($this->root.$file);
 			
 			return $content;
 		}
@@ -360,11 +378,11 @@
 		public function getFilesInFolder($dir) {
 			$dir = trim($dir, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$dir)) {
-				return $this->addLibError("Mappen kunne ikke findes.");
+			if(! $this->isDir($dir)) {
+				return $this->addLibError("Mappen findes ikke.");
 			}
 			
-			$files = new RecursiveDirectoryIterator($dir);
+			$files = new RecursiveDirectoryIterator($this->root.$dir);
 			$final = array();
 			
 			foreach($files as $fileinfo) {
@@ -395,15 +413,11 @@
 		public function getFileSize($file, $format = null) {
 			$file = trim($file, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($file) && ! $this->isDir($file)) {
+				return $this->addLibError("Filen / mappen findes ikke.");
 			}
 			
-			if(is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file)) {
-				return $this->addLibError("Filen er en mappe.");
-			}
-			
-			$size = (float)filesize(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$file);
+			$size = (float)filesize($this->root.$file);
 			
 			if($format) {
 				$size = Helper_converter::convertByteFromTo($size, "b", $format);
@@ -425,8 +439,8 @@
 		public function getFileExtension($path) {
 			$path = trim($path, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path)) {
-				return false;
+			if(! $this->isFile($path)) {
+				return $this->addLibError("Filen findes ikke.");
 			}
 			
 			$splitted = explode('.', $path);
@@ -451,8 +465,8 @@
 		public function getFileNameFromFilePath($path, $with_ext = null) {
 			$path = trim($path, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path)) {
-				return $this->addLibError("Filen kunne ikke findes.");
+			if(! $this->isFile($path)) {
+				return $this->addLibError("Filen findes ikke.");
 			}
 			
 			$splittet = explode('/', $path);
@@ -477,7 +491,11 @@
 		 * <p>New file name without file extension.</p>
 		 */
 		public function forceDownload($path, $file_name) {
-			$path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.trim($path, '/');
+			if(! $this->isFile($path)) {
+				return $this->addLibError("Filen findes ikke.");
+			}
+			
+			$path = $this->root.trim($path, '/');
 
 			$path_splittet = explode('.', $path);
 			$file_ext = '.' .end($path_splittet);
