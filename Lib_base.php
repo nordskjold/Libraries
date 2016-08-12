@@ -11,7 +11,13 @@
 			spl_autoload_extensions('.php');
 			spl_autoload_register(array($this, 'helperLoader'));
 			spl_autoload_register(array($this, 'libLoader'));
-			
+		}
+		
+		/**
+		 * 
+		 * @return \libraryFactory
+		 */
+		public function getLibraryFactory() {
 			return new libraryFactory();
 		}
 		

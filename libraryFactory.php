@@ -1,6 +1,6 @@
 <?php
 
-	class libraryFactory {
+	class libraryFactory extends Lib_base {
 		
 		private $cookie_lib;
 		private $file_system_lib;
@@ -17,6 +17,7 @@
 		private $image_lib;
 		
 		function __construct() {}
+		
 		private function __clone() {}
 		
 		/**
