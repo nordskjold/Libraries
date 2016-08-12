@@ -19,7 +19,7 @@
 		protected $subject, $message, $alt_message;
 		
 		function __construct() {
-			require_once dirname(dirname(__FILE__)). '/library/PHPMailer/class.phpmailer.php';
+			require_once $this->root. 'library/PHPMailer/class.phpmailer.php';
 			
 			if(! $this->phpmailer) {
 				$this->phpmailer = new PHPMailer();
@@ -184,13 +184,13 @@
 		 * @return boolean <b>TRUE</b> on success, <b>FALSE</b> if the file could not be retrieved.
 		 */
 		public function addMessageFromHtmlFile($path, $placeholders = null) {
-			$path = trim($path, '/');
+			$path = trim($path, "/");
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path)) {
+			if(! file_exists($this->root.$path) || is_dir($this->root.$path)) {
 				return false;
 			}
 			
-			$path = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path;
+			$path = $this->root.$path;
 			
 			$html = file_get_contents($path);
 			
@@ -237,7 +237,7 @@
 		public function addAttachment($path, Lib_file_system $file_system, $new_name = null) {
 			$path = trim($path, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path) || is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path)) {
+			if(! file_exists($this->root.$path) || is_dir($this->root.$path)) {
 				return false;
 			}
 			
@@ -384,7 +384,7 @@
 		 * @return boolean <b>TRUE</b> if the connection is established, <b>FALSE</b> if not.
 		 */
 		public function addSMTPFromSupportedServers($smtp_server, $smtp_username, $smtp_password) {
-			$servers = parse_ini_file(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR. 'library' .DIRECTORY_SEPARATOR. 'flat_files' .DIRECTORY_SEPARATOR. 'SMTP_servers.ini', true);
+			$servers = parse_ini_file($this->root. 'library/flat_files/SMTP_servers.ini', true);
 			
 			if(array_key_exists($smtp_server, $servers)) {
 				return $this->smtpConnect($servers[$smtp_server]['host'], $servers[$smtp_server]['port'], $servers[$smtp_server]['auth'], $smtp_username, $smtp_password);
