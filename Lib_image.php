@@ -16,12 +16,12 @@
 		 * Initiates the image handler.
 		 * 
 		 * @param string $file
-		 * <p>Absolut path from the root to and file name to delete.</p>
+		 * <p>Absolut path from the root.</p>
 		 * 
 		 * @return boolean <b>TRUE</b> if the image is initiated, <b>FALSE</b> if not.
 		 */
 		public function init($file) {
-			$this->file = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.trim($file, '/');
+			$this->file = $this->root.trim($file, "/");
 			
 			if(! file_exists($this->file) || is_dir($this->file)) {
 				return $this->addLibError("Filen kunne ikke findes.");
@@ -95,7 +95,7 @@
 				return false;
 			}
 			
-			$thumb = array("file" => "", "file_path" => dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.trim($thumb_path, '/'), "file_name" => "", "file_extension" => "", "file_new_width" => "", "file_new_height" => "");
+			$thumb = array("file" => "", "file_path" => $this->root.trim($thumb_path, "/"), "file_name" => "", "file_extension" => "", "file_new_width" => "", "file_new_height" => "");
 			
 			if(! file_exists($thumb["file_path"]) || ! is_dir($thumb["file_path"])) {
 				return $this->addLibError("Ugyldig sti.");
