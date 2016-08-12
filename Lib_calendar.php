@@ -209,7 +209,7 @@
 				$file_content .= 'END:VEVENT'."\n";
 			$file_content .= 'END:VCALENDAR'."\n";
 			
-			file_put_contents(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$uid. '.ics', $file_content);
+			file_put_contents($this->root.trim($path, "/").DIRECTORY_SEPARATOR.$uid. '.ics', $file_content);
 			
 			$this->clearObj();
 			
