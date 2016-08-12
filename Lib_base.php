@@ -1,103 +1,44 @@
 <?php
 
-	class Lib_base extends database {
+	class Lib_base {
 		
-		private $lib_errors;
 		protected $root, $lib_path;
 		
-		/**
-		 * Disabling extending of database functions, restricting database to base only
-		 */
-		final protected function executeInsertStmt($table_name, $model, $assoc_model_array) {
-			parent::executeInsertStmt($table_name, $model, $assoc_model_array);
-		}
-		
-		final protected function executeInsertRelationStmt($table_name, $model) {
-			parent::executeInsertRelationStmt($table_name, $model);
-		}
-		
-		final protected function executeUpdateStmt($table_name, $model, $assoc_model_array) {
-			parent::executeUpdateStmt($table_name, $model, $assoc_model_array);
-		}
-		
-		final protected function find($id, $table_name, $table_id) {
-			parent::find($id, $table_name, $table_id);
-		}
-		
-		final protected function findAll($filter, $order, $limit, $table_name) {
-			parent::findAll($filter, $order, $limit, $table_name);
-		}
-		
-		private function __construct() {
+		public function __construct() {
 			$this->root = $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR;
 			$this->lib_path = dirname(__FILE__);
+			
+			spl_autoload_extensions('.php');
+			spl_autoload_register(array($this, 'helperLoader'));
+			spl_autoload_register(array($this, 'libLoader'));
+			
+			return new libraryFactory();
 		}
 		
 		/**
-		 * Check for library errors.
-		 * 
-		 * @return boolean <b>TRUE</b> if theres no errors, <b>FALSE</b> if there is.
+		 * Helper autoloader.
 		 */
-		public function isLibErrorsEmpty() {
-			if(! empty($this->lib_errors)) {
+		private function helperLoader($class) {
+			$file = $this->lib_path. '/helper/' .$class. '.php';
+			
+			if(! file_exists($file)) {
 				return false;
-			} else {
-				return true;
 			}
+			
+			include $file;
 		}
 		
 		/**
-		 * Stores a library error message.
-		 *
-		 * @param string $message
-		 * <p>The error message to store.</p>
-		 * 
-		 * @return boolean <b>FALSE</b> is always returned for saving of brackets in libraries.
+		 * Library autoloader.
 		 */
-		protected function addLibError($message = null) {
-			if($message) {
-				if(! is_array($this->lib_errors)) {
-					$this->lib_errors = array();
-				}
-				
-				$this->lib_errors[get_called_class()][] = $message;
-			}
-
-			return false;
-		}
-
-		/**
-		 * Get library error messages.
-		 * 
-		 * @return string|boolean The error messages, <b>FALSE</b> if empty.
-		 */
-		public function getLibError() {
-			if(! $this->isLibErrorsEmpty() && array_key_exists(get_called_class(), $this->lib_errors)) {
-				$return = "";
-
-				foreach($this->lib_errors[get_called_class()] as $error) {
-					$return .= rtrim(ucfirst($error), '.'). '.<br />';
-				}
-				
-				return rtrim($return, '<br />');
-			} else {
+		private function libLoader($class) {
+			$file = $this->lib_path. '/' .$class. '.php';
+			
+			if(! file_exists($file)) {
 				return false;
 			}
-		}
-		
-		/**
-		 * Get the User ID
-		 *
-		 * @return int|boolean The User ID if logged in, <b>FALSE</b> if not.
-		 */
-		protected function getUserId() {
-			if(isset($_SESSION['logged'])) {
-				return (int)$_SESSION['logged'];
-			} elseif(array_key_exists("remember_login", $_COOKIE)) {
-				return $_COOKIE["remember_login"];
-			} else {
-				return false;
-			}
+			
+			include $file;
 		}
 	}
 
