@@ -140,7 +140,7 @@
 			
 			$path = trim($path, '/');
 			
-			if(! file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path) || ! is_dir(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$path)) {
+			if(! file_exists($this->root.$path) || ! is_dir($this->root.$path)) {
 				return $this->addLibError("Ugyldig sti.");
 			}
 			
@@ -150,7 +150,7 @@
 				$this->file_name = $new_name;
 			}
 			
-			if(file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$this->file_path.DIRECTORY_SEPARATOR.$this->file_name. '.' .$this->file_extension)) {
+			if(file_exists($this->root.$this->file_path.DIRECTORY_SEPARATOR.$this->file_name. '.' .$this->file_extension)) {
 				return $this->addLibError("Filen eksistere allerede.");
 			}
 			
@@ -167,7 +167,7 @@
 				return false;
 			}
 			
-			move_uploaded_file($this->file["tmp_name"], dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.$this->file_path.DIRECTORY_SEPARATOR.$this->file_name. '.' .$this->file_extension);
+			move_uploaded_file($this->file["tmp_name"], $this->root.$this->file_path.DIRECTORY_SEPARATOR.$this->file_name. '.' .$this->file_extension);
 			
 			$return = $this->file_name. '.' .$this->file_extension;
 			
