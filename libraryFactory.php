@@ -5,11 +5,8 @@
 		private $cookie_lib;
 		private $file_system_lib;
 		private $ftp_lib;
-		private $http_lib;
 		private $IMAP_lib;
 		private $mailer_lib;
-		private $message_lib;
-		private $session_lib;
 		private $uploader_lib;
 		private $validator_lib;
 		private $calendar_lib;
@@ -60,19 +57,6 @@
 		}
 		
 		/**
-		 * Fetch the HTTP library.
-		 * 
-		 * @return Lib_http HTTP library instance.
-		 */
-		public function getHttpLib() {
-			if(! $this->http_lib) {
-				$this->http_lib = new Lib_http();
-			}
-			
-			return $this->http_lib;
-		}
-		
-		/**
 		 * Fetch the IMAP library.
 		 * 
 		 * @return Lib_IMAP IMAP library instance.
@@ -96,32 +80,6 @@
 			}
 			
 			return $this->mailer_lib;
-		}
-		
-		/**
-		 * Fetch the message library.
-		 * 
-		 * @return Lib_message Message library instance.
-		 */
-		public function getMessageLib() {
-			if(! $this->message_lib) {
-				$this->message_lib = new Lib_message();
-			}
-			
-			return $this->message_lib;
-		}
-		
-		/**
-		 * Fetch the session library.
-		 * 
-		 * @return Lib_session Session library instance.
-		 */
-		public function getSessionLib() {
-			if(! $this->session_lib) {
-				$this->session_lib = new Lib_session();
-			}
-			
-			return $this->session_lib;
 		}
 		
 		/**
